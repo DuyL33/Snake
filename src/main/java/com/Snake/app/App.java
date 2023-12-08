@@ -17,6 +17,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.AnchorPane;
+
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -24,7 +28,7 @@ import java.util.List;
 
 public class App extends Application{
     private static final int WIDTH = 800;
-    private static final int HEIGHT = WIDTH;
+    private static final int HEIGHT = 800;
     private static final int ROWS = 20;
     private static final int COLS = ROWS;
     private static final int SQUARE_SIZE = WIDTH/ ROWS;
@@ -58,17 +62,33 @@ public class App extends Application{
     private int currentDirection;
     private int score = 0;
 
+    private Button startButton;
+    private Button restartButton;
     @Override
     public void start(Stage primaryStage){
         try {
             primaryStage.setTitle("Snake");
-            Group root = new Group();
+            StackPane root = new StackPane();
+
             Canvas canvas = new Canvas(WIDTH,HEIGHT);
-            root.getChildren().add(canvas);
+            Button switchButton = new Button("Switch");
+            gc = canvas.getGraphicsContext2D();
+            drawBackground(gc);
+            root.getChildren().addAll(canvas, switchButton);
             Scene scene = new Scene(root);
+
+            //Start button
+            //Button switchButton = new Button("Switch");
+            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(150), e -> run(gc)));
+            switchButton.setOnAction(e -> {
+                root.getChildren().remove(switchButton);
+                primaryStage.setScene(scene);
+                timeline.play();
+            });
+
             primaryStage.setScene(scene);
             primaryStage.show();
-            gc = canvas.getGraphicsContext2D();
+            //gc = canvas.getGraphicsContext2D();
 
             scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
                 @Override
@@ -76,23 +96,31 @@ public class App extends Application{
                     KeyCode code = event.getCode();
                     if(code == KeyCode.RIGHT || code == KeyCode.D){
                         if(currentDirection != LEFT){
+                            System.out.print("d");
                             currentDirection = RIGHT;
                         }
                     }
                     else if(code == KeyCode.LEFT || code == KeyCode.A){
+
                         if(currentDirection != RIGHT){
+                            System.out.print("a");
                             currentDirection = LEFT;
                         }
                     }
                     else if(code == KeyCode.UP || code == KeyCode.W){
                         if(currentDirection != DOWN){
+                            System.out.print("w");
                             currentDirection = UP;
                         }
                     }
                     else if(code == KeyCode.DOWN || code == KeyCode.S){
                         if(currentDirection != UP){
+                            System.out.print("s");
                             currentDirection = DOWN;
                         }
+                    }
+                    else{
+                        System.out.print("nothing");
                     }
                 }
             });
@@ -100,14 +128,15 @@ public class App extends Application{
             for (int i = 0; i < 3; i++){
                 snakeBody.add(new Point(5, ROWS/2));
             }
-
+            //snakeBody.add(new Point(5, ROWS/2));
 
             generateFood();
             snakeHead = snakeBody.get(0);
             
-            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(80), e -> run(gc)));
+            //Timeline timeline = new Timeline(new KeyFrame(Duration.millis(80), e -> run(gc)));
             timeline.setCycleCount(Animation.INDEFINITE);
-            timeline.play();
+
+            //timeline.play();
 
         } catch (Exception e) {
             Throwable cause = e.getCause();
@@ -130,6 +159,7 @@ public class App extends Application{
         drawFood(gc);
         drawSnake(gc);
         drawScore();
+
         for (int i = snakeBody.size() -1; i>=1;i--){
             snakeBody.get(i).x = snakeBody.get(i-1).x;
             snakeBody.get(i).y = snakeBody.get(i-1).y;  
@@ -187,12 +217,14 @@ public class App extends Application{
     }
     private void drawSnake(GraphicsContext gc) {
         gc.setFill(Color.web("FFF200"));
+        
         gc.fillRoundRect(snakeHead.getX() * SQUARE_SIZE, snakeHead.getY() * SQUARE_SIZE, SQUARE_SIZE - 1, SQUARE_SIZE - 1, 35, 35);
 
         for (int i = 1; i < snakeBody.size(); i++) {
             gc.fillRoundRect(snakeBody.get(i).getX() * SQUARE_SIZE, snakeBody.get(i).getY() * SQUARE_SIZE, SQUARE_SIZE - 1,
                     SQUARE_SIZE - 1, 20, 20);
         }
+        
     }
 
 
@@ -213,14 +245,25 @@ public class App extends Application{
     public void gameOver(){
         if(snakeHead.x < 0 || snakeHead.y < 0 || snakeHead.x *SQUARE_SIZE >= WIDTH || snakeHead.y * SQUARE_SIZE >= HEIGHT){
             gameOver = true;
+            System.out.print("HIT Wall");
         }
-        for (int i =1; i< snakeBody.size();i++){
+        for (int i = 1 ; i < snakeBody.size();i++){
             if(snakeHead.x ==  snakeBody.get(i).getX() && snakeHead.getY() == snakeBody.get(i).getY()){
                 gameOver = true;
+                System.out.print("HIT BODY");
                 break;
             }
         }
     }
+    /**
+    System.out.print(i);
+                System.out.print("Head X:" + snakeHead.x);
+                System.out.print("Head Y:" + snakeHead.y);
+                System.out.print(i);
+                System.out.print("BODY X:" + snakeBody.get(i).getX());
+                System.out.print("BODY Y:" + snakeBody.get(i).getY());
+                System.out.print("HIT BODY");
+     */
     private void eatFood(){
         if (snakeHead.getX() == foodX && snakeHead.getY() == foodY){
             snakeBody.add(new Point(-1,-1));
