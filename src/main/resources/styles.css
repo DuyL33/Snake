@@ -5,6 +5,10 @@
     -fx-text-fill: white;          /* White text color */
     -fx-font-size: 20px;           /* Font size */
     -fx-pref-width: 200px;         /* Preferred width */
-    -fx-pref-height: 100px;
-    -fx-alignment: center;
+    -fx-pref-height: 50px;
+}
+
+.vbox {
+    -fx-alignment: center; /* Center align items within the VBox */
+    -fx-padding: 150 0 0 0;
 }

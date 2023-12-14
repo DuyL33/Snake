@@ -32,8 +32,8 @@ public class Snake{
         this.gc = gc;
         this.SQUARE_SIZE = ss;
         this.color = color;
-
-        for (int i = 0; i < 6; i++){
+        this.currentDirection = RIGHT;
+        for (int i = 0; i < 3; i++){
                 snakeBody.add(new Point(x, y));
             }
         this.snakeHead = this.snakeBody.get(0);
@@ -129,6 +129,9 @@ public class Snake{
     }
     public Point getHead(){
         return snakeHead;
+    }
+    public void clear(){
+        snakeBody.clear();
     }
 
 }
