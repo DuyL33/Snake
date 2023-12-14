@@ -1,0 +1,10 @@
+/* styles.css */
+
+.start-button {
+    -fx-background-color: #4CAF50; /* Green background color */
+    -fx-text-fill: white;          /* White text color */
+    -fx-font-size: 20px;           /* Font size */
+    -fx-pref-width: 200px;         /* Preferred width */
+    -fx-pref-height: 100px;
+    -fx-alignment: center;
+}

@@ -1,30 +1,22 @@
 package com.Snake.app;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+
 import javafx.animation.AnimationTimer;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
 
 public class App extends Application{
     private static final int WIDTH = 800;
@@ -33,40 +25,23 @@ public class App extends Application{
     private static final int COLS = ROWS;
     private static final int SQUARE_SIZE = WIDTH/ ROWS;
 
-   private static final String[] FOOD_IMAGE = new String[]{
-    "/img/ic_apple.png",
-    "/img/ic_berry.png",
-    "/img/ic_cherry.png",
-    "/img/ic_coconut_.png",
-    "/img/ic_orange.png",
-    "/img/ic_peach.png",
-    "/img/ic_pomegranate.png",
-    "/img/ic_tomato.png",
-    "/img/ic_watermelon.png"
-};
-
-
-
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
-
     private GraphicsContext gc;
-    private List<Point> snakeBody = new ArrayList();
-    private Point snakeHead;
-    private Image foodImage;
-    private int foodX;
-    private int foodY;
+
     private boolean gameOver;
-    private int currentDirection;
-    private int oldDirection;
+    private boolean gameOver2;
     private int score = 0;
+    private int score2 = 0;
 
 
     private long lastUpdateTime = 0;
     private final double targetFrameRate = 10.0;
     private final double targetFrameTime = 1.0 / targetFrameRate;
+
+    private Snake snake;
+    private Snake snake2;
+    private Food food = new Food();
+    private Button sb = new Button("Two Player");
+    private Button sb2 = new Button("Single Player");
 
     @Override
     public void start(Stage primaryStage){
@@ -75,85 +50,46 @@ public class App extends Application{
             primaryStage.setTitle("Snake");
             StackPane root = new StackPane();
             Canvas canvas = new Canvas(WIDTH,HEIGHT);
-            Button switchButton = new Button("Switch");
-            Button restartButton = new Button("Restart");
+
             Scene scene = new Scene(root);
+            VBox vbox = new VBox(8);
             AnimationTimer animationTimer;
+            Control c = new Control();
+
+            vbox.getChildren().addAll(sb2, sb);
 
             gc = canvas.getGraphicsContext2D();
-            drawBackground(gc);
-            root.getChildren().addAll(canvas, switchButton);
+
+            root.getChildren().addAll(canvas, vbox);
+
+            //load css into fx
+            String cssPath = getClass().getResource("/styles.css").toExternalForm();
+            root.getStylesheets().add(cssPath);
+
+            vbox.getStyleClass().add("start-button");
+
+
             primaryStage.setScene(scene);
             primaryStage.show();
 
+
+            snake = new Snake(gc, SQUARE_SIZE, 5, 2, "FFF200");
+            snake2 = new Snake(gc, SQUARE_SIZE, 5, 17, "FFC0CB");
+
+            food.generateFood(snake);
             animationTimer = new AnimationTimer() {
                 
                 public void handle(long now){
                     double elapsedSeconds = (now - lastUpdateTime) / 1_000_000_000.0;
                     if (elapsedSeconds >= targetFrameTime) {
                         run(gc);
-                        // Update last update time
+
                         lastUpdateTime = now;
                     }
                 }
             };
-
-            scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
-                @Override
-                public void handle(KeyEvent event){
-                    KeyCode code = event.getCode();
-                    if(code == KeyCode.RIGHT || code == KeyCode.D){
-                        if(oldDirection != LEFT){
-                            System.out.print("d");
-                            currentDirection = RIGHT;
-                        }
-                    }
-                    else if(code == KeyCode.LEFT || code == KeyCode.A){
-
-                        if(oldDirection != RIGHT){
-                            System.out.print("a");
-                            currentDirection = LEFT;
-                        }
-                    }
-                    else if(code == KeyCode.UP || code == KeyCode.W){
-                        if(oldDirection != DOWN){
-                            System.out.print("w");
-                            currentDirection = UP;
-                        }
-                    }
-                    else if(code == KeyCode.DOWN || code == KeyCode.S){
-                        if(oldDirection != UP){
-                            System.out.print("s");
-                            currentDirection = DOWN;
-                        }
-                    }
-                    else{
-                        System.out.print("nothing");
-                    }
-                }
-            });
-
-            for (int i = 0; i < 3; i++){
-                snakeBody.add(new Point(5, ROWS/2));
-            }
-
-
-            generateFood();
-
-            snakeHead = snakeBody.get(0);
-            switchButton.setOnAction(e -> {
-                root.getChildren().remove(switchButton);
-                primaryStage.setScene(scene);
-                animationTimer.start();
-
-            });
-            if(gameOver == true){
-                root.getChildren().remove(canvas);
-            }
-            restartButton.setOnAction(e ->{
-                root.getChildren().add(switchButton);
-                resetGame();
-            });
+            c.keyHandle(scene,snake, snake2);
+            startButton(primaryStage, root, scene, animationTimer, vbox);
 
         } catch (Exception e) {
             Throwable cause = e.getCause();
@@ -166,39 +102,30 @@ public class App extends Application{
         
     }
     private void run(GraphicsContext gc){
-        if(gameOver == true){
+        if(gameOver == true || gameOver2 == true){
             gc.setFill(Color.RED);
             gc.setFont(new Font("Digital-7",70));
             gc.fillText("Game Over", WIDTH/3.5, HEIGHT/2);
-            resetGame();
+
             return;
         }
+        
         drawBackground(gc);
-        drawFood(gc);
-        drawSnake(gc);
         drawScore();
+        drawScore2();
+        snake.drawSnake(gc);
+        snake.move();
+        snake2.drawSnake(gc);
+        snake2.move();
 
-        for (int i = snakeBody.size() -1; i>=1;i--){
-            snakeBody.get(i).x = snakeBody.get(i-1).x;
-            snakeBody.get(i).y = snakeBody.get(i-1).y;  
-        }
-        this.oldDirection = this.currentDirection;
-        switch (currentDirection){
-            case RIGHT:
-                moveRight();
-                break;
-            case LEFT:
-                moveLeft();
-                break;
-            case UP:
-                moveUP();
-                break;
-            case DOWN:
-                moveDown();
-                break;
-        }
-        gameOver();
-        eatFood();
+        food.drawFood(gc);
+        
+        gameOver = snake.gameOver(gameOver, snake2);
+        gameOver2 = snake2.gameOver(gameOver2, snake);
+
+        score = food.eatFood(snake,score);
+        score2 = food.eatFood(snake2,score2);
+
     }
     private void drawBackground(GraphicsContext gc){
         for(int i = 0; i<ROWS;i++){
@@ -215,90 +142,28 @@ public class App extends Application{
         }
     }
     
-    private void generateFood(){
-        start:
-        while(true){
-            foodX = (int)(Math.random()* ROWS);
-            foodY = (int)(Math.random()* COLS);
-            for(Point snake: snakeBody){
-                if(snake.getX() == foodX && snake.getY() == foodY){
-                    continue start;
-                }
-            }
-            foodImage = new Image(FOOD_IMAGE[(int)(Math.random() * FOOD_IMAGE.length)]);
-            break;
-
-        }
-    }
-    private void drawFood(GraphicsContext gc){
-        gc.drawImage(foodImage, foodX * SQUARE_SIZE, foodY*SQUARE_SIZE, SQUARE_SIZE,SQUARE_SIZE);
-    }
-    private void drawSnake(GraphicsContext gc) {
-        gc.setFill(Color.web("FFF200"));
-        
-        gc.fillRoundRect(snakeHead.getX() * SQUARE_SIZE, snakeHead.getY() * SQUARE_SIZE, SQUARE_SIZE - 1, SQUARE_SIZE - 1, 35, 35);
-
-        for (int i = 1; i < snakeBody.size(); i++) {
-            gc.fillRoundRect(snakeBody.get(i).getX() * SQUARE_SIZE, snakeBody.get(i).getY() * SQUARE_SIZE, SQUARE_SIZE - 1,
-                    SQUARE_SIZE - 1, 20, 20);
-        }
-        
-    }
-
-
-    private void moveRight(){
-        snakeHead.x++;
-    }
-    private void moveLeft(){
-        snakeHead.x--;
-    }
-
-    private void moveUP(){
-        snakeHead.y--;
-    }
-    private void moveDown(){
-        snakeHead.y++;
-    }
-
-    public void gameOver(){
-        if(snakeHead.x < 0 || snakeHead.y < 0 || snakeHead.x *SQUARE_SIZE >= WIDTH || snakeHead.y * SQUARE_SIZE >= HEIGHT){
-            gameOver = true;
-            System.out.print("HIT Wall");
-        }
-        for (int i = 1 ; i < snakeBody.size();i++){
-            if(snakeHead.x ==  snakeBody.get(i).getX() && snakeHead.getY() == snakeBody.get(i).getY()){
-                gameOver = true;
-                System.out.print("HIT BODY");
-                break;
-            }
-        }
-    }
-
-    private void eatFood(){
-        if (snakeHead.getX() == foodX && snakeHead.getY() == foodY){
-            snakeBody.add(new Point(-1,-1));
-            generateFood();
-            score +=1;
-        }
-    }
-
     private void drawScore(){
         gc.setFill(Color.YELLOW);
         gc.setFont(new Font("Digital-7",35));
-        gc.fillText("Score: " + score, 10,35);
+        gc.fillText("Score1: " + score, 10,35);
 
     }
-    private void resetGame() {
-        snakeBody.clear();
-        for (int i = 0; i < 3; i++) {
-            snakeBody.add(new Point(5, ROWS / 2));
-        }
-        snakeHead = snakeBody.get(0);
-        generateFood();
-        currentDirection = RIGHT;
-        gameOver = false;
-        score = 0;
+    private void drawScore2(){
+        gc.setFill(Color.PINK);
+        gc.setFont(new Font("Digital-7",35));
+        gc.fillText("Score2: " + score2, 650,35);
+
     }
+    private void startButton(Stage primaryStage, StackPane root, Scene scene, AnimationTimer animationTimer, VBox vbox){
+        sb.setOnAction(e -> {
+                root.getChildren().remove(vbox);
+                primaryStage.setScene(scene);
+                animationTimer.start();
+
+        });
+
+    }
+
     public static void main(String[] args){
         launch(args);
 
