@@ -1,4 +1,5 @@
 com/Snake/app/Food.class
+com/Snake/app/DataBase.class
 com/Snake/app/Control.class
 com/Snake/app/Snake.class
 com/Snake/app/App$1.class

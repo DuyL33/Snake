@@ -66,8 +66,8 @@ public class Control{
                         }
                     }
                     else if(code == KeyCode.K){
-                        if(snake2.getOldDirection() != UP){
-                            //System.out.print("s");
+                        if(snake.getOldDirection() != UP){
+                            System.out.print("s");
                             snake2.setCurrentDirection(DOWN);
                         }
                     }

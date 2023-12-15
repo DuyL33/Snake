@@ -17,7 +17,14 @@ import javafx.scene.layout.VBox;
 
 import javafx.animation.AnimationTimer;
 
-import java.util.concurrent.TimeUnit;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class App extends Application{
     private static final int WIDTH = 800;
@@ -35,7 +42,7 @@ public class App extends Application{
 
 
     private long lastUpdateTime = 0;
-    private final double targetFrameRate = 5.5;
+    private final double targetFrameRate = 10.0;
     private final double targetFrameTime = 1.0 / targetFrameRate;
 
     private Snake snake;
@@ -45,6 +52,12 @@ public class App extends Application{
     private Button sb2 = new Button("Single Player");
     private boolean singlePlayer = true;
     private AnimationTimer animationTimer;
+
+    private String name;
+    private DataBase db = new DataBase();
+
+    // JDBC connection string for SQLite
+    private static final String JDBC_URL = "jdbc:sqlite:highscores.db";
     @Override
     public void start(Stage primaryStage){
         try {
@@ -148,7 +161,9 @@ public class App extends Application{
         if(gameOver == true){
             gc.setFill(Color.RED);
             gc.setFont(new Font("Digital-7",70));
-            gc.fillText("Game Over", WIDTH/3.5, HEIGHT/2);
+            gc.fillText(name + "Game Over", WIDTH/3.5, HEIGHT/2);
+            db.connect(name, score);
+
             resetGame(scene, c);
             vbox.toFront();
             animationTimer.stop();
@@ -159,7 +174,7 @@ public class App extends Application{
         snake.drawSnake(gc);
         snake.move();
         food.drawFood(gc);
-        gameOver = snake.gameOver(gameOver, snake2);
+        gameOver = snake.gameOver(gameOver, null);
         score = food.eatFood(snake,score);
     }
     private void drawBackground(GraphicsContext gc){
@@ -202,10 +217,24 @@ public class App extends Application{
     private void singleButton(Stage primaryStage, StackPane root, Scene scene, AnimationTimer animationTimer, VBox vbox){
         sb2.setOnAction(e -> {
                 //root.getChildren().remove(vbox);
+
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Single Player");
+                dialog.setHeaderText("Enter your name:");
+                dialog.setContentText("Name:");
+
+                Optional<String> result = dialog.showAndWait();
+                result.ifPresent(playerName -> {
+                // Set the player's name (you can use it as needed)
+                System.out.println("Player Name: " + playerName);
+                name = playerName;
+
+                // Proceed with the game
                 singlePlayer = true;
                 vbox.toBack();
                 primaryStage.setScene(scene);
                 animationTimer.start();
+                });
         });
 
     }
@@ -224,6 +253,16 @@ public class App extends Application{
         // Generate new food
         food.generateFood(snake);
 
+    }
+    private static void insertData(Connection connection, int id, String playerName, int score) throws SQLException {
+        String insertQuery = "INSERT INTO Players (id, pname, score) VALUES (?, ?, ?)";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setInt(1, id);
+            preparedStatement.setString(2, playerName);
+            preparedStatement.setInt(3, score);
+            preparedStatement.executeUpdate();
+        }
     }
     public static void main(String[] args){
         launch(args);
