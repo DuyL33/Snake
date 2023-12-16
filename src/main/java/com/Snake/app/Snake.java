@@ -8,8 +8,6 @@ import java.util.List;
 
 public class Snake{
 
-
-
     private List<Point> snakeBody = new ArrayList();
     private Point snakeHead;
     GraphicsContext gc;
@@ -18,21 +16,11 @@ public class Snake{
     private int oldDirection;
     private String color;
 
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
-    private static int SQUARE_SIZE;
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 800;
-    private static final int ROWS = 20;
-    private static final int COLS = ROWS;
-
-    public Snake(GraphicsContext gc, int ss, int x, int y, String color){
+    public Snake(GraphicsContext gc, int x, int y, String color){
         this.gc = gc;
-        this.SQUARE_SIZE = ss;
         this.color = color;
-        this.currentDirection = RIGHT;
+        this.currentDirection = Control.RIGHT;
+
         for (int i = 0; i < 3; i++){
                 snakeBody.add(new Point(x, y));
             }
@@ -41,32 +29,33 @@ public class Snake{
     public void drawSnake(GraphicsContext gc) {
         gc.setFill(Color.web(color));
         
-        gc.fillRoundRect(snakeHead.getX() * SQUARE_SIZE, snakeHead.getY() * SQUARE_SIZE, SQUARE_SIZE - 1, SQUARE_SIZE - 1, 35, 35);
+        gc.fillRoundRect(snakeHead.getX() * App.getSQUARE_SIZE(), snakeHead.getY() * App.getSQUARE_SIZE(), App.getSQUARE_SIZE() - 1, App.getSQUARE_SIZE() - 1, 35, 35);
 
         for (int i = 1; i < snakeBody.size(); i++) {
-            gc.fillRoundRect(snakeBody.get(i).getX() * SQUARE_SIZE, snakeBody.get(i).getY() * SQUARE_SIZE, SQUARE_SIZE - 1,
-                    SQUARE_SIZE - 1, 20, 20);
+            gc.fillRoundRect(snakeBody.get(i).getX() * App.getSQUARE_SIZE(), snakeBody.get(i).getY() * App.getSQUARE_SIZE(), App.getSQUARE_SIZE() - 1,
+                    App.getSQUARE_SIZE() - 1, 20, 20);
         }
         
     }
     public void move(){
+
         for (int i = snakeBody.size() -1; i>=1;i--){
             snakeBody.get(i).x = snakeBody.get(i-1).x;
             snakeBody.get(i).y = snakeBody.get(i-1).y;  
         }
-        this.oldDirection = this.currentDirection;
 
+        this.oldDirection = this.currentDirection;
         switch (currentDirection){
-            case RIGHT:
+            case Control.RIGHT:
                 moveRight();
                 break;
-            case LEFT:
+            case Control.LEFT:
                 moveLeft();
                 break;
-            case UP:
+            case Control.UP:
                 moveUP();
                 break;
-            case DOWN:
+            case Control.DOWN:
                 moveDown();
                 break;
         }
@@ -74,7 +63,11 @@ public class Snake{
     public boolean gameOver(boolean gameOver, Snake snake2){
 
         //Hit wall
-        if(snakeHead.x < 0 || snakeHead.y < 0 || snakeHead.x *SQUARE_SIZE >= WIDTH || snakeHead.y * SQUARE_SIZE >= HEIGHT){
+        if(snakeHead.x < 0
+         || snakeHead.y < 0
+         || snakeHead.x * App.getSQUARE_SIZE() >= App.getWIDTH()
+         || snakeHead.y * App.getSQUARE_SIZE() >= App.getHEIGHT()){
+
             gameOver = true;
             System.out.print("HIT Wall");
         }

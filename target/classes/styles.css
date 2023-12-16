@@ -10,5 +10,31 @@
 
 .vbox {
     -fx-alignment: center; /* Center align items within the VBox */
-    -fx-padding: 150 0 0 0;
+    -fx-background-color: green;
+    -fx-max-width: 350px;
+    -fx-max-height: 500px;
+    -fx-background-radius: 10px;
+
+}
+
+.topPlayers{
+    -fx-font-size: 20px;
+    -fx-text-fill: white;  
+    -fx-background-color: #023020;
+    -fx-background-radius: 10px;
+    -fx-max-width:210px;
+    -fx-max-height: 250px;
+    -fx-pref-height: 200px;
+    -fx-padding: 10 10 10 10;
+    -fx-font-weight: bold;
+}
+
+.title{
+    -fx-font-size: 100px;
+    -fx-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -fx-font-weight: bold;
+    -fx-text-fill: white; /* Text color */
+    -fx-padding: 5px; /* Padding around the text */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0); /* Drop shadow effect */
+
 }

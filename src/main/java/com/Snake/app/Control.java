@@ -9,12 +9,13 @@ import javafx.event.EventHandler;
 
 public class Control{
 
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
+    public static final int RIGHT = 0;
+    public static final int LEFT = 1;
+    public static final int UP = 2;
+    public static final int DOWN = 3;
 
     public void keyHandle(Scene scene, Snake snake, Snake snake2){
+
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
                 @Override
@@ -74,4 +75,5 @@ public class Control{
                 }
             });
     }
+
 }

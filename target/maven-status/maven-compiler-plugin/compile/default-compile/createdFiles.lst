@@ -3,5 +3,6 @@ com/Snake/app/DataBase.class
 com/Snake/app/Control.class
 com/Snake/app/Snake.class
 com/Snake/app/App$1.class
+com/Snake/app/Player.class
 com/Snake/app/App.class
 com/Snake/app/Control$1.class

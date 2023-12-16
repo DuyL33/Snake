@@ -21,10 +21,7 @@ import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javafx.scene.control.Label;
 
 public class App extends Application{
     private static final int WIDTH = 800;
@@ -55,9 +52,9 @@ public class App extends Application{
 
     private String name;
     private DataBase db = new DataBase();
+    private Label topplayer;
+    private Label snakeGameText = new Label("Snake");
 
-    // JDBC connection string for SQLite
-    private static final String JDBC_URL = "jdbc:sqlite:highscores.db";
     @Override
     public void start(Stage primaryStage){
         try {
@@ -66,30 +63,33 @@ public class App extends Application{
             Canvas canvas = new Canvas(WIDTH,HEIGHT);
 
             Scene scene = new Scene(root);
-            VBox vbox = new VBox(8);
-            //AnimationTimer animationTimer;
+            VBox vbox = new VBox(10);
             Control c = new Control();
-
-            vbox.getChildren().addAll(sb2, sb);
+            String cssPath = getClass().getResource("/styles.css").toExternalForm();
+            topplayer = new Label(db.getTop5Players());
+            vbox.getChildren().addAll(snakeGameText,topplayer, sb2, sb);
 
             gc = canvas.getGraphicsContext2D();
 
             root.getChildren().addAll(canvas, vbox);
 
             //load css into fx
-            String cssPath = getClass().getResource("/styles.css").toExternalForm();
+            //String cssPath = getClass().getResource("/styles.css").toExternalForm();
             root.getStylesheets().add(cssPath);
 
             sb.getStyleClass().add("start-button");
             sb2.getStyleClass().add("start-button");
             vbox.getStyleClass().add("vbox");
+            topplayer.getStyleClass().add("topPlayers");
+            snakeGameText.getStyleClass().add("title");
 
+            drawBackground(gc);
             primaryStage.setScene(scene);
             primaryStage.show();
 
 
-            snake = new Snake(gc, SQUARE_SIZE, 5, 2, "FFF200");
-            snake2 = new Snake(gc, SQUARE_SIZE, 5, 17, "FFC0CB");
+            snake = new Snake(gc, 5, 2, "FFF200");
+            snake2 = new Snake(gc, 5, 17, "FFC0CB");
 
             food.generateFood(snake);
             animationTimer = new AnimationTimer() {
@@ -126,13 +126,13 @@ public class App extends Application{
             gc.setFill(Color.RED);
             gc.setFont(new Font("Digital-7",70));
             if(gameOver == true && gameOver2 == false){
-                gc.fillText("Player2 Win", WIDTH/3.5, HEIGHT/2);
+                gc.fillText("Player2 Win",WIDTH/3.5, 120);
             }
             else if(gameOver == false && gameOver2 == true){
-                gc.fillText("Player1 Win", WIDTH/3.5, HEIGHT/2);
+                gc.fillText("Player1 Win", WIDTH/3.5, 120);
             }
             else{
-                gc.fillText("Draw", WIDTH/3.5, HEIGHT/2);
+                gc.fillText("Draw", WIDTH/3.5, 120);
             }
             resetGame(scene, c);
             vbox.toFront();
@@ -159,10 +159,13 @@ public class App extends Application{
     }
     private void run2(GraphicsContext gc, Control c, Scene scene, VBox vbox){
         if(gameOver == true){
+            db.connect(name, score);
+            topplayer.setText(db.getTop5Players());
+
             gc.setFill(Color.RED);
             gc.setFont(new Font("Digital-7",70));
-            gc.fillText(name + "Game Over", WIDTH/3.5, HEIGHT/2);
-            db.connect(name, score);
+            gc.fillText("Game Over", WIDTH/3.5, 120);
+            
 
             resetGame(scene, c);
             vbox.toFront();
@@ -195,13 +198,13 @@ public class App extends Application{
     private void drawScore(){
         gc.setFill(Color.YELLOW);
         gc.setFont(new Font("Digital-7",35));
-        gc.fillText("Score1: " + score, 10,35);
+        gc.fillText("Score: " + score, 10,35);
 
     }
     private void drawScore2(){
         gc.setFill(Color.PINK);
         gc.setFont(new Font("Digital-7",35));
-        gc.fillText("Score2: " + score2, 650,35);
+        gc.fillText("Score: " + score2, 650,35);
 
     }
     private void startButton(Stage primaryStage, StackPane root, Scene scene, AnimationTimer animationTimer, VBox vbox){
@@ -247,23 +250,33 @@ public class App extends Application{
         score2 = 0;
 
         // Reset snakes
-        snake = new Snake(gc, SQUARE_SIZE, 5, 2, "FFF200");
-        snake2 = new Snake(gc, SQUARE_SIZE, 5, 17, "FFC0CB");
+        snake = new Snake(gc, 5, 2, "FFF200");
+        snake2 = new Snake(gc, 5, 17, "FFC0CB");
         c.keyHandle(scene,snake, snake2);
         // Generate new food
         food.generateFood(snake);
 
     }
-    private static void insertData(Connection connection, int id, String playerName, int score) throws SQLException {
-        String insertQuery = "INSERT INTO Players (id, pname, score) VALUES (?, ?, ?)";
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.setString(2, playerName);
-            preparedStatement.setInt(3, score);
-            preparedStatement.executeUpdate();
-        }
+    public static int getWIDTH(){
+        return WIDTH;
     }
+    public static int getHEIGHT(){
+        return HEIGHT;
+    }
+    public static int getROWS(){
+        return ROWS;
+    }
+    public static int getCOLS(){
+        return COLS;
+    }
+    public static int getSQUARE_SIZE(){
+        return SQUARE_SIZE;
+    }
+
+
+
+
+
     public static void main(String[] args){
         launch(args);
     }

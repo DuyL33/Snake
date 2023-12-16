@@ -7,12 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DataBase {
+    private String jdbcUrl = "jdbc:mysql://localhost:3306/PlayerRank";
+    private String user = "Duy";
+    private String password = "Anhem123";
 
     public void connect( String name, int score){
-        String jdbcUrl = "jdbc:mysql://localhost:3306/PlayerRank";
-        String user = "Duy";
-        String password = "Anhem123";
-        //launch(args);
         System.out.println("Connecting database ...");
         try {
             //launch(args);
@@ -59,7 +58,36 @@ public class DataBase {
                 maxId = resultSet.getInt(1);
             }
         }
-
         return maxId + 1;
-}
+    }
+    public String getTop5Players() {
+
+        String topPlayers = "Top 5 Single Players\n";
+        
+        // Sort players based on score in descending order and fetch the top 5
+        String query = "SELECT pname, score FROM Players ORDER BY score DESC LIMIT 5";
+        int i = 1;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            // Open a connection
+            Connection connection = DriverManager.getConnection(jdbcUrl, user, password);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String playerName = resultSet.getString("pname");
+                int score = resultSet.getInt("score");
+                Player player = new Player(playerName, score);
+                topPlayers += i + ". " + player.toString();
+                i++;
+            }
+
+        }
+        catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return topPlayers;
+        
+    }
 }

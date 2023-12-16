@@ -1,17 +1,14 @@
 package com.Snake.app;
+
 import javafx.scene.image.Image;
 import javafx.scene.canvas.GraphicsContext;
 import java.awt.Point;
+
 public class Food{
 
     private Image foodImage;
     private int foodX;
     private int foodY;
-    private static final int WIDTH = 800;
-    private static final int ROWS = 20;
-    private static final int COLS = ROWS;
-    private static final int SQUARE_SIZE = WIDTH/ ROWS;
-
     private static final String[] FOOD_IMAGE = new String[]{
     "/img/ic_apple.png",
     "/img/ic_berry.png",
@@ -27,8 +24,8 @@ public class Food{
     public void generateFood(Snake snake){
             start:
             while(true){
-                foodX = (int)(Math.random()* ROWS);
-                foodY = (int)(Math.random()* COLS);
+                foodX = (int)(Math.random()* App.getROWS());
+                foodY = (int)(Math.random()* App.getCOLS());
                 for(Point snakeBlock: snake.getBody()){
                     if(snakeBlock.getX() == foodX && snakeBlock.getY() == foodY){
                         continue start;
@@ -40,7 +37,7 @@ public class Food{
             }
     }
     public void drawFood(GraphicsContext gc){
-        gc.drawImage(foodImage, foodX * SQUARE_SIZE, foodY*SQUARE_SIZE, SQUARE_SIZE,SQUARE_SIZE);
+        gc.drawImage(foodImage, foodX * App.getSQUARE_SIZE(), foodY*App.getSQUARE_SIZE(), App.getSQUARE_SIZE(),App.getSQUARE_SIZE());
     }
 
     public int eatFood(Snake snake, int score){
