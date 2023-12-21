@@ -39,7 +39,7 @@ public class App extends Application{
 
 
     private long lastUpdateTime = 0;
-    private final double targetFrameRate = 10.0;
+    private final double targetFrameRate = 5.0;
     private final double targetFrameTime = 1.0 / targetFrameRate;
 
     private Snake snake;
